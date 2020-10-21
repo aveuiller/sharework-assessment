@@ -28,7 +28,7 @@ $ poetry install
 
 Once installed, you can run the project tests with:
 ```bash
-$ poetry run pytest
+$ poetry run pytest [--cov]
 ```
 
 ### Start the project

@@ -6,13 +6,21 @@ authors = ["Antoine Veuiller <aveuiller@gmail.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.8"
+
+# Matching dependencies
+phonenumbers = "^8.12.11"
+pycountry = "^20.7.3"
+
+# Backend dependencies
 flask = "^1.1.2"
 Flask-RESTful = "^0.3.8"
 
 [tool.poetry.dev-dependencies]
+pycodestyle = "^2.6.0"
 pytest = "^5.2"
 pytest-cov = "^2.10.1"
-pycodestyle = "^2.6.0"
+# pytest-cov config dependency
+toml = "^0.10.1"
 
 [build-system]
 requires = ["poetry>=0.12"]
@@ -21,3 +29,6 @@ build-backend = "poetry.masonry.api"
 [tool.poetry.scripts]
 sharework_backend = 'sharework.backend:main'
 sharework_matching = 'sharework.matching:main'
+
+[tool.coverage.run]
+source = ['sharework']
