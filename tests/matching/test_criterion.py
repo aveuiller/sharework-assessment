@@ -5,7 +5,7 @@ from sharework.matching.criterion import (
     NameContainedCriterion,
     PhoneCriterion
 )
-from sharework.matching.persistence import Company
+from sharework.matching.model import Company
 
 
 class CriterionTestCase(unittest.TestCase):

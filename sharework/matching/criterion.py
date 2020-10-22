@@ -16,7 +16,7 @@ from typing import Optional
 import phonenumbers
 import pycountry
 
-from sharework.matching.persistence import Company
+from sharework.matching.model import Company
 
 logger = logging.getLogger(__name__)
 
@@ -81,7 +81,7 @@ class FieldCriterion(CompanyCriterion):
         try:
             fields = [self._extract_field(company) for company in (one, two)]
         except AttributeError:
-            logger.error(f"Unavailable attribute {self.field}")
+            logger.debug(f"Unavailable attribute {self.field}")
             return None
         else:
             return self._compare(*fields)
@@ -98,10 +98,9 @@ class FieldCriterion(CompanyCriterion):
 
 
 class NameContainedCriterion(FieldCriterion):
-    """This criterion is a match if we can find the whole name of one company
-    in another."""
-
     def __init__(self, weight: int = 1) -> None:
+        """This criterion is a match if we can find the whole name of
+         one company in another."""
         super().__init__("name", weight)
 
     def _compare(self, field_one: str, field_two: str):
@@ -109,8 +108,8 @@ class NameContainedCriterion(FieldCriterion):
 
 
 class PostalCodeCriterion(FieldCriterion):
-
     def __init__(self, weight: int = 1) -> None:
+        """This criterion compares two postal codes identity."""
         super().__init__("postal_code", weight)
 
     def _normalize(self, field) -> str:
@@ -118,11 +117,10 @@ class PostalCodeCriterion(FieldCriterion):
 
 
 class AddressCriterion(CompanyCriterion):
-    """This criterion is a match if the complete Address is matching between
-    the two companies.
-    """
-
     def __init__(self, weight: int = 3) -> None:
+        """This criterion is a match if the complete Address is matching
+        between the two companies.
+        """
         super().__init__(weight)
         self.criteria = [
             # TODO: We maybe could be more open on the address syntax
@@ -143,11 +141,10 @@ class AddressCriterion(CompanyCriterion):
 
 
 class PhoneCriterion(FieldCriterion):
-    """This criterion is a match if the complete Address is matching between
-    the two companies.
-    """
-
     def __init__(self, weight: int = 3) -> None:
+        """This criterion is a match if the complete Address is matching
+        between the two companies.
+        """
         super().__init__("phone", weight)
 
     def _normalize(self, field, country: str = None) -> str:
@@ -163,14 +160,14 @@ class PhoneCriterion(FieldCriterion):
         try:
             number = phonenumbers.parse(field, None)
         except phonenumbers.phonenumberutil.NumberParseException:
-            logger.warning(f"Unable to parse phone {field} without country")
+            logger.debug(f"Unable to parse phone {field} without country")
             try:
                 country = country.capitalize()
                 iso2 = pycountry.countries.get(name=country).alpha_2
                 number = phonenumbers.parse(field, iso2)
             except (phonenumbers.phonenumberutil.NumberParseException,
                     KeyError):
-                logger.warning(f"Unable to parse phone {field} "
+                logger.debug(f"Unable to parse phone {field} "
                                f"with country {country}")
                 raise AttributeError
         return phonenumbers.format_number(number,
@@ -185,6 +182,7 @@ class PhoneCriterion(FieldCriterion):
 
 class DomainNameCriterion(FieldCriterion):
     def __init__(self, weight: int = 5) -> None:
+        """This criterion compares the root domain name of two websites."""
         super().__init__("website", weight)
 
     def _normalize(self, field) -> str:
