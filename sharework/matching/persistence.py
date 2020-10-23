@@ -98,18 +98,19 @@ class SqliteDataDumper(DataDumper):
 
     def _init_db(self) -> None:
         """Creates the requires db schema"""
-        connection = self.new_connection()
         path = os.path.join(RESOURCES_DIR, "sql", "0_init_matches_table.sql")
-        with open(path, "r") as script:
-            connection.executescript(script.read())
-        connection.commit()
+        with self.new_connection() as connection:
+            with open(path, "r") as script:
+                content = script.read()
+                connection.executescript(content)
+            connection.commit()
 
     def add(self, data: CompanyMatch) -> None:
+        # Not the best way of persisting the criteria, we could have a
+        # separate table for that.
         self.lines.append((
             data.company_a.source_name, data.company_a.source_id,
             data.company_b.source_name, data.company_b.source_id,
-            # Not the best way of persisting the criteria, we could have a
-            # separate table for that.
             data.score, ';'.join(data.success_criteria)
         ))
         if len(self.lines) > 500:
@@ -125,9 +126,9 @@ class SqliteDataDumper(DataDumper):
             score, success_criteria
         ) VALUES (?, ?, ?, ?, ?, ?)"""
 
-        connection = self.new_connection()
-        connection.execute(sql, self.lines)
-        connection.commit()
+        with self.new_connection() as connection:
+            connection.executemany(sql, self.lines)
+            connection.commit()
         self.lines.clear()
 
     def new_connection(self) -> sqlite3.Connection:

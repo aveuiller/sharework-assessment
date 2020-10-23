@@ -61,7 +61,7 @@ class CompanyMatcher:
 
             if match:
                 current_score += criterion.weight
-                successes.append(criterion.__class__.__name__)
+                successes.append(criterion.name)
 
         return CompanyMatch(one, two, current_score / total_weight, successes)
 

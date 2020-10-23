@@ -66,7 +66,11 @@ class SQLiteDataLoader(DataLoader):
 
     def load(self) -> Generator[Company, None, None]:
         sql = "SELECT * FROM companies WHERE source_name = ?"
-        result = self.new_connection().execute(sql, (self.source_name,))
+        with self.new_connection() as connection:
+            # Unfortunately, streaming the results will keep the connection
+            # open, thus locking the database with SQLite. Hence 'fetchall'
+            # This could behave better on other DBMS.
+            result = connection.execute(sql, (self.source_name,)).fetchall()
 
         for row in result:
             # Skip id on the Company constructor.
@@ -76,4 +80,5 @@ class SQLiteDataLoader(DataLoader):
             yield Company(*row[1:])
 
     def new_connection(self) -> sqlite3.Connection:
-        return sqlite3.connect(self.db_path)
+        return sqlite3.connect(f"file:{self.db_path}?mode=ro", uri=True,
+                               isolation_level=None)
