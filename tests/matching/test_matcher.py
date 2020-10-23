@@ -13,11 +13,19 @@ class SuccessCriterion(CompanyCriterion):
     def match(self, one: Company, two: Company) -> Optional[bool]:
         return True
 
+    @property
+    def name(self):
+        return self.__class__.__name__
+
 
 class FailureCriterion(CompanyCriterion):
 
     def match(self, one: Company, two: Company) -> Optional[bool]:
         return False
+
+    @property
+    def name(self):
+        return self.__class__.__name__
 
 
 class UnsureCriterion(CompanyCriterion):
@@ -25,8 +33,20 @@ class UnsureCriterion(CompanyCriterion):
     def match(self, one: Company, two: Company) -> Optional[bool]:
         return None
 
+    @property
+    def name(self):
+        return self.__class__.__name__
+
 
 class CompanyMatcherTestCase(unittest.TestCase):
+
+    def setUp(self) -> None:
+        super().setUp()
+        self.one = Mock(spec=Company)
+        self.one.name = '1'
+        self.two = Mock(spec=Company)
+        self.two.name = '2'
+
     def test_matcher_percentage(self):
         matcher = CompanyMatcher(criteria=[
             SuccessCriterion(5),
@@ -37,15 +57,40 @@ class CompanyMatcherTestCase(unittest.TestCase):
             UnsureCriterion(50),
             UnsureCriterion(1),
             UnsureCriterion(10),
-        ])
-        one = Mock(spec=Company)
-        one.name = '1'
-        two = Mock(spec=Company)
-        two.name = '2'
-        match = matcher.match(one, two)
+        ], strict=False)
+
+        match = matcher.match(self.one, self.two)
+
         self.assertEqual(0.5, match.score)
-        self.assertEqual(one, match.company_a)
-        self.assertEqual(two, match.company_b)
+        self.assertEqual(self.one, match.company_a)
+        self.assertEqual(self.two, match.company_b)
+        self.assertEqual([SuccessCriterion.__name__],
+                         match.success_criteria)
+
+    def test_matcher_percentage_strict(self):
+        matcher = CompanyMatcher(criteria=[
+            SuccessCriterion(5),
+            UnsureCriterion(5),
+        ], strict=True)
+
+        match = matcher.match(self.one, self.two)
+
+        self.assertEqual(0.5, match.score)
+        self.assertEqual(self.one, match.company_a)
+        self.assertEqual(self.two, match.company_b)
+        self.assertEqual([SuccessCriterion.__name__],
+                         match.success_criteria)
+
+    def test_matcher_percentage_success_not_strict(self):
+        matcher = CompanyMatcher(criteria=[
+            SuccessCriterion(5),
+            UnsureCriterion(5),
+        ], strict=False)
+
+        match = matcher.match(self.one, self.two)
+        self.assertEqual(1.0, match.score)
+        self.assertEqual(self.one, match.company_a)
+        self.assertEqual(self.two, match.company_b)
         self.assertEqual([SuccessCriterion.__name__],
                          match.success_criteria)
 

@@ -25,18 +25,26 @@ logger = logging.getLogger(__name__)
 class CompanyMatcher:
     DEFAULT_CRITERIA = [
         DomainNameCriterion(5),
-        FieldCriterion("name", 3),
+        FieldCriterion("name", 5),
         AddressCriterion(3),
         PhoneCriterion(3),
         NameContainedCriterion(1),
     ]
 
-    def __init__(self, criteria: List[CompanyCriterion] = None) -> None:
-        """Define the percentage of match between two companies"""
+    def __init__(self, criteria: List[CompanyCriterion] = None,
+                 strict: bool = True) -> None:
+        """Define the percentage of match between two companies
+
+        :param criteria: The list of criterion to use on matching.
+        :param strict: We want a strict match on all fields. If True,
+        the weight of criterion with missing data is still added to the total
+        weight, thus making it harder to match companies when missing data.
+        """
         super().__init__()
         if not criteria:
             criteria = self.DEFAULT_CRITERIA
         self.criteria = criteria
+        self.strict = strict
 
     def match(self, one: Company, two: Company) -> CompanyMatch:
         """Compute if two company seems to be the same
@@ -52,9 +60,7 @@ class CompanyMatcher:
         successes = []
         for criterion in self.criteria:
             match = criterion.match(one, two)
-            # We take the criterion into account
-            # if the comparison could actually be done.
-            if match is not None:
+            if self.strict or match is not None:
                 total_weight += criterion.weight
 
             if match:

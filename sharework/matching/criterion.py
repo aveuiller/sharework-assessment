@@ -37,6 +37,10 @@ class CompanyCriterion(ABC):
         """
         raise NotImplementedError
 
+    @property
+    def name(self):
+        raise NotImplementedError
+
 
 class FieldCriterion(CompanyCriterion):
     def __init__(self, field: str, weight: int) -> None:
@@ -96,6 +100,10 @@ class FieldCriterion(CompanyCriterion):
         """
         return field_one == field_two
 
+    @property
+    def name(self):
+        return f"{self.__class__.__name__}:{self.field}"
+
 
 class NameContainedCriterion(FieldCriterion):
     def __init__(self, weight: int = 1) -> None:
@@ -106,6 +114,10 @@ class NameContainedCriterion(FieldCriterion):
     def _compare(self, field_one: str, field_two: str):
         return field_one in field_two or field_two in field_one
 
+    @property
+    def name(self):
+        return self.__class__.__name__
+
 
 class PostalCodeCriterion(FieldCriterion):
     def __init__(self, weight: int = 1) -> None:
@@ -114,6 +126,10 @@ class PostalCodeCriterion(FieldCriterion):
 
     def _normalize(self, field) -> str:
         return super()._normalize(field).replace('.0', '')
+
+    @property
+    def name(self):
+        return self.__class__.__name__
 
 
 class AddressCriterion(CompanyCriterion):
@@ -138,6 +154,10 @@ class AddressCriterion(CompanyCriterion):
                 # we won't have enough data to be certain.
                 return match
         return True
+
+    @property
+    def name(self):
+        return self.__class__.__name__
 
 
 class PhoneCriterion(FieldCriterion):
@@ -168,7 +188,7 @@ class PhoneCriterion(FieldCriterion):
             except (phonenumbers.phonenumberutil.NumberParseException,
                     KeyError):
                 logger.debug(f"Unable to parse phone {field} "
-                               f"with country {country}")
+                             f"with country {country}")
                 raise AttributeError
         return phonenumbers.format_number(number,
                                           phonenumbers.PhoneNumberFormat.E164)
@@ -178,6 +198,10 @@ class PhoneCriterion(FieldCriterion):
         if field is None or not str(field):
             raise AttributeError
         return self._normalize(field, company.country)
+
+    @property
+    def name(self):
+        return self.__class__.__name__
 
 
 class DomainNameCriterion(FieldCriterion):
@@ -193,3 +217,7 @@ class DomainNameCriterion(FieldCriterion):
         domain = normalized.split('/')[0]
         root_domain = '.'.join(domain.split(".")[-2:])
         return root_domain
+
+    @property
+    def name(self):
+        return self.__class__.__name__
