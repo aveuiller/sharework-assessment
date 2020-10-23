@@ -1,6 +1,7 @@
 """
 This module defines the ways of loading data.
 """
+import os
 from abc import ABC
 from csv import DictReader
 from typing import Generator
@@ -24,19 +25,26 @@ class CSVDataLoader(DataLoader):
         "phone", "address", "postal_code", "city", "country"
     ]
 
-    def __init__(self, path: str) -> None:
+    def __init__(self, path: str, shorten=True) -> None:
         """Load all companies from the given CSV file.
 
         :param path: Path to the file.
+        :param shorten: Shorten the source name to the last element
+        in the path.
         """
         super().__init__()
         self.path = path
+        self.shorten = shorten
 
     def load(self) -> Generator[Company, None, None]:
         with open(self.path, 'r') as file:
             reader = DictReader(file, fieldnames=self.FIELDS)
             for line in reader:
-                line.update({"source_name": self.path})
+                source = self.path
+                if self.shorten:
+                    source = source.split(os.path.sep)[-1]
+
+                line.update({"source_name": source})
                 yield Company(**line)
 
 
