@@ -1,12 +1,19 @@
 """
 This module defines the ways of loading data.
 """
+import logging
 import os
+import sqlite3
 from abc import ABC
 from csv import DictReader
+from logging import config
 from typing import Generator
 
+from sharework import RESOURCES_DIR
 from sharework.matching.model import Company
+
+config.fileConfig(os.path.join(RESOURCES_DIR, "logging.config"))
+logger = logging.getLogger(__name__)
 
 
 class DataLoader(ABC):
@@ -53,13 +60,23 @@ class SQLiteDataLoader(DataLoader):
         """Load all data from a SQLite database,
         with the source matching the given name.
 
-        TODO: Implement me
-
         :param db_path: Path of the sqlite file.
         :param source_name: Name of the source to query.
         """
         super().__init__()
         self.db_path = db_path
+        self.source_name = source_name
 
     def load(self) -> Generator[Company, None, None]:
-        pass
+        sql = "SELECT * FROM companies WHERE source_name = ?"
+        result = self.new_connection().execute(sql, (self.source_name,))
+
+        for row in result:
+            # Skip id on the Company constructor.
+            # This works because the constructor has the same order as the
+            # table. this is quite a weak binding and may be better with a
+            # strong naming in the retrieved values.
+            yield Company(*row[1:])
+
+    def new_connection(self) -> sqlite3.Connection:
+        return sqlite3.connect(self.db_path)
