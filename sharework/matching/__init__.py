@@ -12,7 +12,7 @@ from sharework.matching.matcher import SourcesMatcher
 from sharework.matching.persistence import CSVDataDumper, SqliteDataDumper
 
 config.fileConfig(os.path.join(RESOURCES_DIR, "logging.config"))
-logger = logging.getLogger(__name__)
+logger = logging.getLogger()
 
 
 def main():
@@ -41,7 +41,7 @@ def main():
             if match.score >= threshold:
                 logger.info(f"We have a match "
                             f"between {match.company_a.name} "
-                            f"and {match.company_b.name}")
+                            f"and {match.company_b.name} ({match.score})")
                 dumper.add(match)
 
     dumper.flush()

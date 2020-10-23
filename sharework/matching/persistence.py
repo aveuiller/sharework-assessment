@@ -6,14 +6,12 @@ import os
 import sqlite3
 from abc import ABC
 from csv import DictWriter
-from logging import config
 from typing import List
 
 from sharework import RESOURCES_DIR
 from sharework.matching.model import CompanyMatch
 
-config.fileConfig(os.path.join(RESOURCES_DIR, "logging.config"))
-logger = logging.getLogger(__name__)
+logger = logging.getLogger()
 
 
 class DataDumper(ABC):

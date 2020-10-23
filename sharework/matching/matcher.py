@@ -4,13 +4,10 @@ This module defines the matcher algorithm and imports all needed criterion.
 # TODO: We may want to have an external criterion config. with weight.
 """
 import logging
-import os
 from concurrent.futures import Future
 from concurrent.futures.thread import ThreadPoolExecutor
-from logging import config
 from typing import Generator, List
 
-from sharework import RESOURCES_DIR
 from sharework.matching.criterion import (
     AddressCriterion, CompanyCriterion,
     DomainNameCriterion, FieldCriterion, NameContainedCriterion, PhoneCriterion
@@ -18,8 +15,7 @@ from sharework.matching.criterion import (
 from sharework.matching.loader import DataLoader
 from sharework.matching.model import Company, CompanyMatch
 
-config.fileConfig(os.path.join(RESOURCES_DIR, "logging.config"))
-logger = logging.getLogger(__name__)
+logger = logging.getLogger()
 
 
 class CompanyMatcher:
@@ -53,7 +49,7 @@ class CompanyMatcher:
         :param two: The second company to match.
         :return: The rate of matching between two companies from 0 to 1.
         """
-        logger.info(f"Comparing {one.name} with {two.name}")
+        logger.debug(f"Comparing {one.name} with {two.name}")
 
         total_weight = 0
         current_score = 0

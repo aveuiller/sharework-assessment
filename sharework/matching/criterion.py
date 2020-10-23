@@ -18,7 +18,7 @@ import pycountry
 
 from sharework.matching.model import Company
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger()
 
 
 class CompanyCriterion(ABC):
