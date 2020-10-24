@@ -9,7 +9,8 @@ from tests import RESOURCES_DIR
 
 class CSVLoaderTestCase(unittest.TestCase):
     def test_loaded(self):
-        loader = CSVDataLoader(os.path.join(RESOURCES_DIR, "dataset.csv"))
+        loader = CSVDataLoader(os.path.join(RESOURCES_DIR,
+                                            "matching", "dataset.csv"))
         expected_1 = Company(
             source_id='1',
             source_name="dataset.csv",
@@ -40,7 +41,7 @@ class CSVLoaderTestCase(unittest.TestCase):
 
 class SQLiteLoaderTestCase(unittest.TestCase):
     def test_loaded(self):
-        path = os.path.join(RESOURCES_DIR, "dataset.sqlite")
+        path = os.path.join(RESOURCES_DIR, "matching", "dataset.sqlite")
         loader = SQLiteDataLoader(path, "dataset.csv")
         expected_1 = Company(
             source_id=1,

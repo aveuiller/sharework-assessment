@@ -71,7 +71,7 @@ class SourcesMatcher:
                  source_a: DataLoader,
                  source_b: DataLoader,
                  matcher: CompanyMatcher = None,
-                 worker_amount: int = 20) -> None:
+                 worker_amount: int = 10) -> None:
         """
         Create matches between two companies data sources
 

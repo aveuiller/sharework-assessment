@@ -18,7 +18,7 @@ logger = logging.getLogger()
 def main():
     # TODO: Add args to control data loading.
     # TODO: Add args to control computing threshold and timeout.
-    # TODO: Add args to control comparison strictness.
+    # TODO: Add args to control comparison strictness and workers.
     # TODO: Add args to control data persistence.
     timeout_seconds = 60
     threshold = 0.7
@@ -31,7 +31,7 @@ def main():
     source_a, source_b = _sqlite_loaders()
     dumper = SqliteDataDumper(os.path.join(DATA_DIR, "matching_base.sqlite3"))
 
-    comparator = SourcesMatcher(source_a, source_b)
+    comparator = SourcesMatcher(source_a, source_b, worker_amount=5)
     comparator.matcher.strict = True
     logger.info("Starting datasource comparison")
     for future in comparator.compare():
