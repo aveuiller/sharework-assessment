@@ -23,6 +23,10 @@ logger = logging.getLogger()
 
 class CompanyCriterion(ABC):
     def __init__(self, weight: int) -> None:
+        """Generic Criterion class defining contract.
+
+        :param weight: The weight to apply on the criterion.
+        """
         super().__init__()
         self.weight = weight
 
@@ -38,16 +42,16 @@ class CompanyCriterion(ABC):
         raise NotImplementedError
 
     @property
-    def name(self):
+    def name(self) -> str:
         raise NotImplementedError
 
 
 class FieldCriterion(CompanyCriterion):
     def __init__(self, field: str, weight: int) -> None:
-        """Compare the value of two attributes of a company
+        """Compare the value of two attributes of a company.
 
-        :param field:
-        :param weight:
+        :param field: The field that should be retrieved on the company.
+        :param weight: The weight to apply on the criterion.
         """
         super().__init__(weight)
         self.field = field
@@ -73,9 +77,9 @@ class FieldCriterion(CompanyCriterion):
             raise AttributeError
         return self._normalize(field)
 
-    def match(self, one: Company, two: Company):
+    def match(self, one: Company, two: Company) -> Optional[bool]:
         """Retrieve the fields and compare them to match the two companies.
-        If the given fields does not exist, return False.
+        If the given fields does not exist, return None.
 
         :param one: The first company to match.
         :param two: The second company to match.
@@ -90,7 +94,7 @@ class FieldCriterion(CompanyCriterion):
         else:
             return self._compare(*fields)
 
-    def _compare(self, field_one: str, field_two: str):
+    def _compare(self, field_one: str, field_two: str) -> bool:
         """Compare the two fields to check if the companies are matching for
         the current criterion.
 
@@ -101,7 +105,7 @@ class FieldCriterion(CompanyCriterion):
         return field_one == field_two
 
     @property
-    def name(self):
+    def name(self) -> str:
         return f"{self.__class__.__name__}:{self.field}"
 
 
@@ -111,11 +115,11 @@ class NameContainedCriterion(FieldCriterion):
          one company in another."""
         super().__init__("name", weight)
 
-    def _compare(self, field_one: str, field_two: str):
+    def _compare(self, field_one: str, field_two: str) -> bool:
         return field_one in field_two or field_two in field_one
 
     @property
-    def name(self):
+    def name(self) -> str:
         return self.__class__.__name__
 
 
@@ -128,7 +132,7 @@ class PostalCodeCriterion(FieldCriterion):
         return super()._normalize(field).replace('.0', '')
 
     @property
-    def name(self):
+    def name(self) -> str:
         return self.__class__.__name__
 
 
@@ -146,7 +150,7 @@ class AddressCriterion(CompanyCriterion):
             FieldCriterion("country", 1),
         ]
 
-    def match(self, one: Company, two: Company):
+    def match(self, one: Company, two: Company) -> Optional[bool]:
         for criterion in self.criteria:
             match = criterion.match(one, two)
             if not match:
@@ -156,7 +160,7 @@ class AddressCriterion(CompanyCriterion):
         return True
 
     @property
-    def name(self):
+    def name(self) -> str:
         return self.__class__.__name__
 
 
@@ -200,7 +204,7 @@ class PhoneCriterion(FieldCriterion):
         return self._normalize(field, company.country)
 
     @property
-    def name(self):
+    def name(self) -> str:
         return self.__class__.__name__
 
 
@@ -219,5 +223,5 @@ class DomainNameCriterion(FieldCriterion):
         return root_domain
 
     @property
-    def name(self):
+    def name(self) -> str:
         return self.__class__.__name__

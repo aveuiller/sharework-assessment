@@ -29,7 +29,18 @@ class CompanyMatcher:
 
     def __init__(self, criteria: List[CompanyCriterion] = None,
                  strict: bool = True) -> None:
-        """Define the percentage of match between two companies
+        """Define the percentage of match between two companies.
+
+        The matcher algorithm is a weighted percentage of success
+         on all given criteria.
+        The score goes from 0 to 1, 0 meaning that the companies are absolutely
+        not matching, and 1 that they are identical from the criteria point of
+        view.
+
+        As some fields are missing in some companies, we added a concept of
+        strictness on the operation. This strict parameter will control the
+        fact that we consider the absent data as a difference, or if we exclude
+        them from the process.
 
         :param criteria: The list of criterion to use on matching.
         :param strict: We want a strict match on all fields. If True,
@@ -43,7 +54,7 @@ class CompanyMatcher:
         self.strict = strict
 
     def match(self, one: Company, two: Company) -> CompanyMatch:
-        """Compute if two company seems to be the same
+        """Compute if two company seems to be the same.
 
         :param one: The first company to match.
         :param two: The second company to match.
@@ -73,11 +84,7 @@ class SourcesMatcher:
                  matcher: CompanyMatcher = None,
                  worker_amount: int = 10) -> None:
         """
-        Create matches between two companies data sources
-
-        ..attr THRESHOLD:
-            Percentage of identity from which two companies can be
-            considered equals.
+        Create matches between two companies data sources asynchronously.
 
         :param source_a: A generator of companies from the first data source
         :param source_b: A generator of companies from the second data source
@@ -92,7 +99,7 @@ class SourcesMatcher:
         """Compare all data sources and returns the result as a list of
         futures CompanyMatch.
 
-        :return: A Generator containing Futures of CompanyMatch
+        :return: A Generator containing Futures of CompanyMatch.
         """
         for company_a in self.source_a.load():
             for company_b in self.source_b.load():
