@@ -31,8 +31,7 @@ class CompanyTestCase(ModelTestCase):
 
     def setUp(self) -> None:
         super().setUp()
-        Company.SQL_ENGINE = None
-        self.session = Company.get_sql_session(self.db_path)
+        self.session = Company.session_from_path(self.db_path)
         self.company_1 = Company(source_id=1, source_name="testA", name="A")
         self.company_2 = Company(source_id=2, source_name="testB", name="B")
 
@@ -64,8 +63,7 @@ class MatchTestCase(ModelTestCase):
 
     def setUp(self) -> None:
         super().setUp()
-        Company.SQL_ENGINE = None
-        self.session = Company.get_sql_session(self.db_path)
+        self.session = Company.session_from_path(self.db_path)
         self.company_1 = Company(source_id=1, source_name="testA", name="A")
         self.company_2 = Company(source_id=2, source_name="testB", name="B")
 
@@ -81,6 +79,33 @@ class MatchTestCase(ModelTestCase):
     def tearDown(self) -> None:
         super().tearDown()
         self.session.close()
+
+    def test_fetch_all(self):
+        matches = Match.fetch_all(self.session, 5, 0)
+
+        self.assertEqual(1, len(matches))
+        self.assertEqual(self.match.id, matches[0].id)
+
+    def test_fetch_all_filter_company(self):
+        company_3 = Company(source_id=2, source_name="testB", name="B")
+        company_4 = Company(source_id=2, source_name="testB", name="B")
+        match_2 = Match(id=2,
+                        left_company=company_3,
+                        right_company=company_4)
+        match_3 = Match(id=3,
+                        left_company=company_4,
+                        right_company=self.company_2)
+        self.session.add(company_3)
+        self.session.add(company_4)
+        self.session.add(match_2)
+        self.session.add(match_3)
+        self.session.flush()
+
+        matches = Match.fetch_all(self.session, 5, 0, company_id=company_4.id)
+
+        self.assertEqual(2, len(matches))
+        self.assertEqual(sorted([m.id for m in [match_2, match_3]]),
+                         sorted([m.id for m in matches]))
 
     def test_fetch_one_match(self):
         returned = Match.fetch_one(self.session, 1)
